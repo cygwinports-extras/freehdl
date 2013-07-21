@@ -1,0 +1,115 @@
+--- origsrc/freehdl-0.0.8/Makefile.am	2008-02-15 14:02:48.000000000 -0600
++++ src/freehdl-0.0.8/Makefile.am	2013-07-21 15:24:34.008313900 -0500
+@@ -2,7 +2,7 @@
+ 
+ EXTRA_DIST = README.gen-nodes README.vaul README.libraries README.AIRE README.v2cc v2cc.libs HACKING
+ 
+-SUBDIRS = freehdl fire vaul kernel std v2cc doc examples ieee FHDLgui cdfggen
++SUBDIRS = freehdl fire vaul std kernel v2cc doc examples ieee FHDLgui cdfggen
+ 
+ snap:
+ 	$(MAKE) distdir="$(PACKAGE)-`date +%Y%m%d`" dist
+--- origsrc/freehdl-0.0.8/cdfggen/Makefile.am	2006-01-10 03:51:08.000000000 -0600
++++ src/freehdl-0.0.8/cdfggen/Makefile.am	2013-07-21 15:20:22.172909700 -0500
+@@ -13,7 +13,9 @@ CHUNK_CC = cdfggen-chunk.cc
+ 
+ BUILT_SOURCES = cdfggen-chunk.cc
+ 
+-libfreehdl_cdfggen_la_LDFLAGS = -version-info 0:0
++libfreehdl_cdfggen_la_LDFLAGS = -version-info 0:0 -no-undefined
++
++libfreehdl_cdfggen_la_LIBADD = $(top_builddir)/fire/libfreehdl-fire.la
+ 
+ if MAINTAINER_MODE
+ # rules for tree generation
+--- origsrc/freehdl-0.0.8/fire/Makefile.am	2006-01-11 02:51:53.000000000 -0600
++++ src/freehdl-0.0.8/fire/Makefile.am	2013-07-21 15:09:02.288022500 -0500
+@@ -14,7 +14,7 @@ libfreehdl_fire_la_SOURCES = fire-chunk.
+ 	                     fire-types.cc	\
+                              tree-supp.cc
+ 
+-libfreehdl_fire_la_LDFLAGS = -version-info 0:0
++libfreehdl_fire_la_LDFLAGS = -version-info 0:0 -no-undefined
+ 
+ test_fire_SOURCES = test-fire.cc
+ test_fire_LDADD = libfreehdl-fire.la
+--- origsrc/freehdl-0.0.8/freehdl/freehdl-config	2009-10-11 11:37:43.000000000 -0500
++++ src/freehdl-0.0.8/freehdl/freehdl-config	2013-07-21 15:38:21.202626700 -0500
+@@ -39,7 +39,7 @@ case "$option" in
+ 	echo "-L$libdir" ;;
+ 
+   --libtool | -libtool | -libs)
+-	echo "$libdir/libfreehdl-kernel.la $libdir/libfreehdl-std.la" ;;
++	echo "$libdir/libfreehdl-kernel.la" ;;
+ 
+   --ieee | -ieee)
+ 	echo "$libdir/freehdl/libieee.la" ;;
+--- origsrc/freehdl-0.0.8/ieee/Makefile.am	2006-02-15 03:01:43.000000000 -0600
++++ src/freehdl-0.0.8/ieee/Makefile.am	2013-07-21 15:41:49.575544900 -0500
+@@ -9,6 +9,8 @@ freehdllibdir = $(libdir)/freehdl
+ 
+ freehdllib_LTLIBRARIES = libieee.la
+ libieee_la_SOURCES = std_logic_1164.cc numeric_std.cc numeric_bit.cc std_logic_signed.cc std_logic_unsigned.cc std_logic_arith.cc math_real.cc vital_timing.cc
++libieee_la_LDFLAGS = -release freehdl -no-undefined
++libieee_la_LIBADD = $(top_builddir)/kernel/libfreehdl-kernel.la
+ 
+ ieee_DATA = std_logic_1164.vhdl numeric_std.vhdl numeric_bit.vhdl std_logic_signed.vhdl std_logic_unsigned.vhdl std_logic_arith.vhdl math_real.vhdl vital_timing.vhdl
+ 
+--- origsrc/freehdl-0.0.8/kernel/Makefile.am	2006-02-03 01:55:03.000000000 -0600
++++ src/freehdl-0.0.8/kernel/Makefile.am	2013-07-21 15:25:05.953141000 -0500
+@@ -9,8 +9,8 @@ DEBUGDEFS =
+ INCLUDES = -I$(top_srcdir) -I.. $(DEBUGDEFS)
+ 
+ lib_LTLIBRARIES = libfreehdl-kernel.la
+-libfreehdl_kernel_la_LDFLAGS = -version-info 0:0
+-libfreehdl_kernel_la_LIBADD = $(REGEXLIBS)
++libfreehdl_kernel_la_LDFLAGS = -version-info 0:0 -no-undefined
++libfreehdl_kernel_la_LIBADD = $(top_builddir)/std/libfreehdl-std.la $(REGEXLIBS)
+ libfreehdl_kernel_la_CXXFLAGS = $(REGEXDEFS)
+ 
+ libfreehdl_kernel_la_SOURCES = error.cc			\
+--- origsrc/freehdl-0.0.8/std/Makefile.am	2005-12-15 07:22:03.000000000 -0600
++++ src/freehdl-0.0.8/std/Makefile.am	2013-07-21 15:24:47.459083200 -0500
+@@ -1,6 +1,6 @@
+ INCLUDES = -I$(top_srcdir) -I..
+ 
+-lib_LTLIBRARIES = libfreehdl-std.la
++noinst_LTLIBRARIES = libfreehdl-std.la
+ 
+ libfreehdl_std_la_SOURCES = memory.cc \
+ 			    vhdl_types.cc \
+--- origsrc/freehdl-0.0.8/v2cc/gvhdl-local	2005-12-01 16:16:20.000000000 -0600
++++ src/freehdl-0.0.8/v2cc/gvhdl-local	2013-07-21 15:35:10.287707000 -0500
+@@ -8,7 +8,7 @@ my $libtool_options = "--mode=link";
+ my $vhdl_source_name = "";
+ my $source = "";
+ my $includes = "";
+-my $cpplibs = "-lm FREEHDL/kernel/libfreehdl-kernel.la FREEHDL/std/libfreehdl-std.la";
++my $cpplibs = "-lm FREEHDL/kernel/libfreehdl-kernel.la";
+ my $vhdl_library = ""; # Library the design entity is compiled into
+ my $cpp_options = "-static ";
+ my $vhdl_options = "";
+--- origsrc/freehdl-0.0.8/v2cc/gvhdl.in	2011-03-12 07:16:47.000000000 -0600
++++ src/freehdl-0.0.8/v2cc/gvhdl.in	2013-07-21 15:39:05.655169200 -0500
+@@ -9,7 +9,7 @@ my $libtool_options = "--mode=link";
+ my $vhdl_source_name = "";
+ my $source = "";
+ my $includes = "";
+-my $cpplibs = "-lm FREEHDL/lib/libfreehdl-kernel.la FREEHDL/lib/libfreehdl-std.la";
++my $cpplibs = "-lm FREEHDL/lib/libfreehdl-kernel.la";
+ my $vhdl_library = ""; # Library the design entity is compiled into
+ my $cpp_options = "";
+ my $vhdl_options = "";
+--- origsrc/freehdl-0.0.8/vaul/Makefile.am	2009-04-21 17:56:04.000000000 -0500
++++ src/freehdl-0.0.8/vaul/Makefile.am	2013-07-21 15:10:14.860173400 -0500
+@@ -43,7 +43,9 @@ libfreehdl_vaul_la_SOURCES = attr.cc		\
+ 	                     bison-parser.h	\
+ 	                     debug.h
+ 
+-libfreehdl_vaul_la_LDFLAGS = -version-info 0:0
++libfreehdl_vaul_la_LDFLAGS = -version-info 0:0 -no-undefined
++
++libfreehdl_vaul_la_LIBADD = $(top_builddir)/fire/libfreehdl-fire.la
+ 
+ if MAINTAINER_MODE
+ lexer.cc: lexer.ll

@@ -1,0 +1,18 @@
+NAME="freehdl"
+VERSION=0.0.8
+RELEASE=1
+CATEGORY="System"
+SUMMARY="VHDL parser/compiler/simulator suite"
+DESCRIPTION="FreeHDL is a parser/compiler/simulator suite for the hardware
+description language VHDL.  VHDL'93 as well as VHDL'87 files are supported."
+HOMEPAGE="http://www.freehdl.seul.org/"
+#SRC_URI="http://seul.org/~enaroska/freehdl-${VERSION}.tar.gz"
+SRC_URI="mirror://sourceforge/qucs/freehdl-${VERSION}.tar.gz"
+PATCH_URI="0.0.8-no-undefined.patch"
+
+freehdl_REQUIRES="gcc-g++ libtool pkg-config"
+
+# for gvhdl
+KEEP_LA_FILES="all"
+
+DOCS="README.*"
